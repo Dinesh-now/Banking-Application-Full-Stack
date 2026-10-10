@@ -1,6 +1,7 @@
 package com.example.BankingApplicationFSD.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,8 +11,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.BankingApplicationFSD.dto.UserResponseDTO;
 import com.example.BankingApplicationFSD.entity.User;
 import com.example.BankingApplicationFSD.service.UserService;
+
+import jakarta.validation.Valid;
 
 @RestController
 public class UserController {
@@ -23,22 +27,29 @@ public class UserController {
 	}
 	
 	@PostMapping("/users")
-	public User createUser(@RequestBody User user) {
-		return userService.saveUser(user);
+	public UserResponseDTO createUser( @Valid @RequestBody User user) {
+		User savedUser=userService.saveUser(user);
+		return userService.convertToDTO(savedUser);
 	}
 	
+	
 	@GetMapping("/users")
-	public List<User> getAllUsers(){
-		return userService.getAllUsers();
+	public List<UserResponseDTO> getAllUsers(){
+		return userService.getAllUsers()
+				.stream()
+				.map(userService::convertToDTO)
+				.collect(Collectors.toList());
 	}
 	
 	@GetMapping("/users/{id}")
-	public User getUserById(@PathVariable int id) {
-		return userService.getUserById(id);
+	public UserResponseDTO getUserById(@PathVariable int id) {
+		User user=userService.getUserById(id);
+		return userService.convertToDTO(user);
 	}
 	@PutMapping("/users/{id}")
-	public User updateUser(@PathVariable int id,@RequestBody User user) {
-		return userService.updateUser(id, user);
+	public UserResponseDTO updateUser(@PathVariable int id,@Valid @RequestBody User user) {
+		User updatedUser=userService.updateUser(id, user);
+		return userService.convertToDTO(updatedUser);
 	}
 	
 	@DeleteMapping("/users/{id}")
