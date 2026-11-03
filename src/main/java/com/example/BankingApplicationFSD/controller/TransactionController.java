@@ -1,6 +1,7 @@
 package com.example.BankingApplicationFSD.controller;
 
 import java.util.List;
+import com.example.BankingApplicationFSD.dto.TransactionResponseDTO;
 
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,13 +25,15 @@ public class TransactionController {
 	}
 	
 	@PostMapping("/transactions")
-	public Transaction createTransaction(@RequestBody Transaction transaction) {
-		return transactionService.saveTransaction(transaction);
+	public TransactionResponseDTO createTransaction(@RequestBody Transaction transaction) {
+		Transaction savedTransaction = transactionService.saveTransaction(transaction);
+
+		return transactionService.convertToDTO(savedTransaction);
 	}
 	
 	@GetMapping("/transactions")
-	public List<Transaction> getAllTransactions(){
-		return transactionService.getAllTransactions();
+	public List<TransactionResponseDTO> getAllTransactions() {
+	    return transactionService.getAllTransactionsDTO();
 	}
 	
 	@GetMapping("/transactions/{id}")

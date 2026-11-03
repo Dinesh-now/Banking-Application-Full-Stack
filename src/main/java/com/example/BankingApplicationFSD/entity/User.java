@@ -25,6 +25,8 @@ public class User {
 	@Size(min=6,message = "Password must contain at least 6 characters")
 	private String password;
 	
+	private String role="USER";
+	
 	@OneToMany(mappedBy = "user")
 	private List<Account>accounts;
 	
@@ -69,6 +71,14 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 	
 	

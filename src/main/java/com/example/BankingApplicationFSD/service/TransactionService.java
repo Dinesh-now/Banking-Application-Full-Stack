@@ -1,6 +1,7 @@
 package com.example.BankingApplicationFSD.service;
 
 import java.util.List;
+import com.example.BankingApplicationFSD.dto.TransactionResponseDTO;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +25,17 @@ public class TransactionService {
 	public TransactionService(TransactionRepository transactionRepository,AccountRepository accountRepository) {
 		this.transactionRepository=transactionRepository;
 		this.accountRepository=accountRepository;
+	}
+	
+	public TransactionResponseDTO convertToDTO(Transaction transaction) {
+	    return new TransactionResponseDTO(
+	        transaction.getId(),
+	        transaction.getType(),
+	        transaction.getAmount(),
+	        transaction.getDate(),
+	        transaction.getAccount().getId(),
+	        transaction.getAccount().getAccountNumber()
+	    );
 	}
 	
 	public Transaction saveTransaction(Transaction transaction) {
@@ -133,11 +145,17 @@ public class TransactionService {
 		return "Transfer Successfull";
 	}
 	
-	
-	
-	public List<Transaction> getAllTransactions(){
-		return transactionRepository.findAll();
+	public List<Transaction> getAllTransactions() {
+	    return transactionRepository.findAll();
 	}
+	
+	public List<TransactionResponseDTO> getAllTransactionsDTO() {
+	    return transactionRepository.findAll()
+	            .stream()
+	            .map(this::convertToDTO)
+	            .toList();
+	}
+	
 	
 	public Transaction getTransactionById(int id) {
 		return transactionRepository.findById(id).orElse(null);

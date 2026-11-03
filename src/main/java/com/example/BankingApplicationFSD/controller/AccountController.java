@@ -1,7 +1,9 @@
 package com.example.BankingApplicationFSD.controller;
 
 import java.util.List;
+import com.example.BankingApplicationFSD.dto.AccountResponseDTO;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,23 +24,52 @@ public class AccountController {
 	}
 	
 	@PostMapping("/accounts")
-	public Account createAccount(@RequestBody Account account) {
-		return accountService.saveAccount(account);
+	public AccountResponseDTO createAccount(@RequestBody Account account) {
+	    Account savedAccount = accountService.saveAccount(account);
+	    return accountService.convertToDTO(savedAccount);
 	}
 	
 	@GetMapping("/accounts")
-	public List<Account> getAllAccounts(){
-		return accountService.getAllAccounts();
+	public List<Account> getAllAccounts(Authentication authentication) {
+	    return accountService.getAccountsByUserEmail(
+	            authentication.getName()
+	    );
 	}
 	
-	
 	@GetMapping("/accounts/{id}")
-	public Account getAccountById(@PathVariable int id) {
-		return accountService.getAccountById(id);
+	public AccountResponseDTO getAccountById(
+	        @PathVariable int id,
+	        Authentication authentication) {
+
+	    Account account = accountService.getAccountById(
+	            id,
+	            authentication.getName()
+	    );
+
+	    if (account == null) {
+	        return null;
+	    }
+
+	    return accountService.convertToDTO(account);
 	}
 	
 	@PutMapping("/accounts/{id}")
-	public Account updateAccount(@PathVariable int id,@RequestBody Account account) {
-		return accountService.updateAccount(id, account);
+	public AccountResponseDTO updateAccount(
+	        @PathVariable int id,
+	        @RequestBody Account account,
+	        Authentication authentication) {
+
+	    Account updatedAccount = accountService.updateAccount(
+	            id,
+	            account,
+	            authentication.getName()
+	    );
+
+	    if (updatedAccount == null) {
+	        return null;
+	    }
+	    
+	    
+	    return accountService.convertToDTO(updatedAccount);
 	}
 }

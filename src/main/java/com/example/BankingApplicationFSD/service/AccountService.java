@@ -1,6 +1,11 @@
 package com.example.BankingApplicationFSD.service;
 
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import java.util.stream.Collectors;
+
+import com.example.BankingApplicationFSD.dto.AccountResponseDTO;
 
 import org.springframework.stereotype.Service;
 
@@ -20,6 +25,17 @@ public class AccountService {
 		this.userRepository=userRepository;
 	}
 	
+	public AccountResponseDTO convertToDTO(Account account) {
+	    return new AccountResponseDTO(
+	        account.getId(),
+	        account.getAccountNumber(),
+	        account.getBalance(),
+	        account.getUser().getId(),
+	        account.getUser().getName(),
+	        account.getUser().getEmail()
+	    );
+	}
+	
 	public Account saveAccount(Account account) {
 		int userId=account.getUser().getId();
 		
@@ -35,30 +51,52 @@ public class AccountService {
 		return accountRepository.findAll();
 	}
 	
+	public List<Account> getAccountsByUserEmail(String email){
+		return accountRepository.findByUserEmail(email);
+		}
 	
-	public Account getAccountById(int id) {
-		return accountRepository.findById(id).orElse(null);
+	
+	public Account getAccountById(int id, String email) {
+
+	    Account account = accountRepository.findById(id)
+	            .orElseThrow(() -> new ResponseStatusException(
+	                    HttpStatus.NOT_FOUND, "Account not found"));
+
+	    if (!account.getUser().getEmail().equals(email)) {
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN, "You cannot access this account");
+	    }
+
+	    return account;
 	}
 	
-	public Account updateAccount(int id,Account account) {
-		Account existingAccount=accountRepository.findById(id).orElse(null);
-		
-		if(existingAccount!=null) {
-			existingAccount.setAccountNumber(account.getAccountNumber());
-			existingAccount.setBalance(account.getBalance());
-			
-			if(account.getUser()!=null) {
-				int userId=account.getUser().getId();
-				User user=userRepository.findById(userId).orElse(null);
-				
-				if(user!=null) {
-					existingAccount.setUser(user);
-				}
-			}
-			return accountRepository.save(existingAccount);
-		}
-		return null;
-		
+	public Account updateAccount(int id, Account account, String email) {
+
+	    Account existingAccount =
+	            accountRepository.findById(id).orElse(null);
+
+	    if (existingAccount == null) {
+	        return null;
+	    }
+
+	  
+	    if (!existingAccount.getUser().getEmail().equals(email)) {
+	        return null;
+	    }
+
+	    existingAccount.setAccountNumber(account.getAccountNumber());
+	    existingAccount.setBalance(account.getBalance());
+
+	 
+
+	    return accountRepository.save(existingAccount);
+	}
+	
+	public List<AccountResponseDTO> getAllAccountsDTO() {
+	    return accountRepository.findAll()
+	            .stream()
+	            .map(this::convertToDTO)
+	            .collect(Collectors.toList());
 	}
 	
 }
