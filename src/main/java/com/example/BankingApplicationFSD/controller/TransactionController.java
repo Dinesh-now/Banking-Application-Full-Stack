@@ -1,5 +1,7 @@
 package com.example.BankingApplicationFSD.controller;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.Authentication;
+import java.util.stream.Collectors;
 import java.util.List;
 import com.example.BankingApplicationFSD.dto.TransactionResponseDTO;
 
@@ -25,48 +27,94 @@ public class TransactionController {
 	}
 	
 	@PostMapping("/transactions")
-	public TransactionResponseDTO createTransaction(@RequestBody Transaction transaction) {
-		Transaction savedTransaction = transactionService.saveTransaction(transaction);
+	public Transaction createTransaction(
+	        @RequestBody Transaction transaction,
+	        Authentication authentication) {
 
-		return transactionService.convertToDTO(savedTransaction);
+	    return transactionService.saveTransaction(
+	            transaction, authentication.getName());
 	}
 	
 	@GetMapping("/transactions")
-	public List<TransactionResponseDTO> getAllTransactions() {
-	    return transactionService.getAllTransactionsDTO();
+	public List<TransactionResponseDTO> getAllTransactions(
+	        Authentication authentication) {
+
+	    return transactionService
+	            .getTransactionsByUserEmail(authentication.getName())
+	            .stream()
+	            .map(transactionService::convertToDTO)
+	            .collect(Collectors.toList());
 	}
 	
 	@GetMapping("/transactions/{id}")
-	public Transaction getTransactionById(@PathVariable int id) {
-		return transactionService.getTransactionById(id);
+	public TransactionResponseDTO getTransactionById(
+	        @PathVariable int id,
+	        Authentication authentication) {
+
+	    Transaction transaction = transactionService.getTransactionById(
+	            id, authentication.getName());
+
+	    return transactionService.convertToDTO(transaction);
 	}
-	
 	@PutMapping("/transactions/{id}")
-	public Transaction updateTransaction(@PathVariable int id, @RequestBody Transaction transaction) {
-		return transactionService.updateTransaction(id, transaction);
+	public Transaction updateTransaction(
+	        @PathVariable int id,
+	        @RequestBody Transaction transaction,
+	        Authentication authentication) {
+
+	    return transactionService.updateTransaction(
+	            id, transaction, authentication.getName());
 	}
-	
 	@PostMapping("/accounts/{accountId}/deposit")
-	public Transaction deposit(@PathVariable int accountId,@RequestParam double amount) {
-		return transactionService.deposit(accountId, amount);
+	public Transaction deposit(
+	        @PathVariable int accountId,
+	        @RequestParam double amount,
+	        Authentication authentication) {
+
+	    return transactionService.deposit(
+	            accountId, amount, authentication.getName());
 	}
 	
 	@PostMapping("/accounts/{accountId}/withdraw")
-	public Transaction withdraw(@PathVariable int accountId,@RequestParam double amount) {
-		return transactionService.withdraw(accountId, amount);
+	public Transaction withdraw(
+	        @PathVariable int accountId,
+	        @RequestParam double amount,
+	        Authentication authentication) {
+
+	    return transactionService.withdraw(
+	            accountId, amount, authentication.getName());
 	}
 	
 	@PostMapping("/accounts/transfer")
-	public String transfer(@RequestParam int fromAccountId,@RequestParam int toAccountId,@RequestParam double amount) {
-		return transactionService.transfer(fromAccountId, toAccountId, amount);
+	public String transfer(
+	        @RequestParam int fromAccountId,
+	        @RequestParam int toAccountId,
+	        @RequestParam double amount,
+	        Authentication authentication) {
+
+	    return transactionService.transfer(
+	            fromAccountId,
+	            toAccountId,
+	            amount,
+	            authentication.getName());
 	}
+	
 	@GetMapping("/pagination")
-	public Page<Transaction> getTransactionsWithPagination(@RequestParam(defaultValue ="0") int page,@RequestParam(defaultValue ="5") int size){
-		return transactionService.getTransactionsWithPagination(page, size);
+	public Page<Transaction> getTransactionsWithPagination(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "5") int size,
+	        Authentication authentication) {
+
+	    return transactionService.getTransactionsWithPagination(
+	            page, size, authentication.getName());
 	}
 	
 	@GetMapping("/transactions/search")
-	public List<Transaction> searchTransactionsByType(@RequestParam String type){
-		return transactionService.searchTransactionsByType(type);
+	public List<Transaction> searchTransactionsByType(
+	        @RequestParam String type,
+	        Authentication authentication) {
+
+	    return transactionService.searchTransactionsByType(
+	            type, authentication.getName());
 	}
 }

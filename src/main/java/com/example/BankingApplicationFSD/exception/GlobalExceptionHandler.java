@@ -1,5 +1,5 @@
 package com.example.BankingApplicationFSD.exception;
-
+import org.springframework.web.server.ResponseStatusException;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -28,5 +28,14 @@ public class GlobalExceptionHandler {
 				.collect(Collectors.joining(", "));
 		
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+	}
+	
+	@ExceptionHandler(ResponseStatusException.class)
+	public ResponseEntity<String> handleResponseStatusException(
+	        ResponseStatusException ex) {
+
+	    return ResponseEntity
+	            .status(ex.getStatusCode())
+	            .body(ex.getReason());
 	}
 }
